@@ -1,0 +1,111 @@
+/* Messaging System Styles */
+
+/* Message List Page */
+.message-img-container {
+    width: 50px;
+    height: 50px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.message-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Conversation Page */
+.conversation-img-container {
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.conversation-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.message-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message-bubble {
+    max-width: 70%;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 18px;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.message-bubble.sent {
+    background-color: var(--primary-color);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 5px;
+}
+
+.message-bubble.received {
+    background-color: #f1f1f1;
+    color: #333;
+    margin-right: auto;
+    border-bottom-left-radius: 5px;
+}
+
+.message-content {
+    word-break: break-word;
+}
+
+.message-time {
+    font-size: 0.7rem;
+    opacity: 0.8;
+    margin-top: 5px;
+    text-align: right;
+}
+
+/* Message Form */
+#messageForm textarea {
+    resize: none;
+    border-radius: 20px;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+}
+
+#messageForm textarea:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.25);
+}
+
+#messageForm button {
+    border-radius: 0 20px 20px 0;
+}
+
+/* Unread Badge Animation */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.badge {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .message-bubble {
+        max-width: 85%;
+    }
+}

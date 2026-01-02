@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+
+{% block title %}My Items - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0"><i class="fas fa-box me-2"></i>My Items</h2>
+                <a href="{{ url_for('item_bp.add_item') }}" class="btn btn-primary btn-hover-effect">
+                    <i class="fas fa-plus-circle me-2"></i>Add New Item
+                </a>
+            </div>
+            
+            <!-- Tabs for Active/Sold/Purchased Items -->
+            <ul class="nav nav-tabs mb-4" id="itemTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="true">
+                        <i class="fas fa-tag me-2"></i>Active Items
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="sold-tab" data-bs-toggle="tab" data-bs-target="#sold" type="button" role="tab" aria-controls="sold" aria-selected="false">
+                        <i class="fas fa-check-circle me-2"></i>Sold Items
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="purchased-tab" data-bs-toggle="tab" data-bs-target="#purchased" type="button" role="tab" aria-controls="purchased" aria-selected="false">
+                        <i class="fas fa-shopping-bag me-2"></i>Purchased Items
+                    </button>
+                </li>
+            </ul>
+            
+            <!-- Tab Content -->
+            <div class="tab-content" id="itemTabsContent">
+                <!-- Active Items Tab -->
+                <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+                    {% if active_items %}
+                    <div class="row">
+                        {% for item in active_items %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card item-card shadow-lg hover-shadow h-100">
+                                <div class="card-img-top-container">
+                                    {% if item.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="card-img-top" alt="{{ item.title }}">
+                                    {% else %}
+                                    <img src="{{ url_for('static', filename='img/no-image.jpg') }}" class="card-img-top" alt="No Image">
+                                    {% endif %}
+                                    <span class="badge bg-{{ 'success' if item.condition == 'New' else 'warning' if item.condition == 'Like New' else 'info' if item.condition == 'Good' else 'secondary' }} condition-badge">
+                                        {{ item.condition }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.title }}</h5>
+                                    <p class="card-text price">₹{{ item.price }}</p>
+                                    <p class="card-text category"><span class="badge bg-primary">{{ item.category }}</span></p>
+                                    <p class="card-text text-muted small">Posted on {{ item.created_at.strftime('%d %b %Y') }}</p>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="{{ url_for('item_bp.item_detail', item_id=item.id) }}" class="btn btn-outline-primary btn-hover-effect">
+                                            <i class="fas fa-eye me-1"></i> View
+                                        </a>
+                                        <a href="{{ url_for('item_bp.edit_item', item_id=item.id) }}" class="btn btn-outline-warning btn-hover-effect">
+                                            <i class="fas fa-edit me-1"></i> Edit
+                                        </a>
+                                        <button type="button" class="btn btn-outline-success btn-hover-effect" data-bs-toggle="modal" data-bs-target="#markSoldModal{{ item.id }}">
+                                            <i class="fas fa-check-circle me-1"></i> Sold
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Mark as Sold Modal -->
+                            <div class="modal fade" id="markSoldModal{{ item.id }}" tabindex="-1" aria-labelledby="markSoldModalLabel{{ item.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-success text-white">
+                                            <h5 class="modal-title" id="markSoldModalLabel{{ item.id }}">Mark Item as Sold</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to mark "{{ item.title }}" as sold? This action cannot be undone.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('item_bp.mark_as_sold', item_id=item.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-success btn-hover-effect">
+                                                    <i class="fas fa-check-circle me-2"></i>Mark as Sold
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <h4>No active items</h4>
+                        <p>You don't have any active items for sale. Add a new item to start selling!</p>
+                        <a href="{{ url_for('item_bp.add_item') }}" class="btn btn-primary btn-lg mt-3 btn-hover-effect">
+                            <i class="fas fa-plus-circle me-2"></i>Add New Item
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Sold Items Tab -->
+                <div class="tab-pane fade" id="sold" role="tabpanel" aria-labelledby="sold-tab">
+                    {% if sold_items %}
+                    <div class="row">
+                        {% for item in sold_items %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card item-card shadow-lg hover-shadow h-100">
+                                <div class="card-img-top-container">
+                                    {% if item.image %}
+                                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="card-img-top" alt="{{ item.title }}">
+                                    {% else %}
+                                    <img src="{{ url_for('static', filename='img/no-image.jpg') }}" class="card-img-top" alt="No Image">
+                                    {% endif %}
+                                    <div class="sold-overlay">
+                                        <span>SOLD</span>
+                                    </div>
+                                    <span class="badge bg-{{ 'success' if item.condition == 'New' else 'warning' if item.condition == 'Like New' else 'info' if item.condition == 'Good' else 'secondary' }} condition-badge">
+                                        {{ item.condition }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ item.title }}</h5>
+                                    <p class="card-text price">₹{{ item.price }}</p>
+                                    <p class="card-text category"><span class="badge bg-primary">{{ item.category }}</span></p>
+                                    <p class="card-text text-muted small">Sold on {{ item.updated_at.strftime('%d %b %Y') }}</p>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="{{ url_for('item_bp.item_detail', item_id=item.id) }}" class="btn btn-outline-primary btn-hover-effect">
+                                            <i class="fas fa-eye me-1"></i> View
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger btn-hover-effect" data-bs-toggle="modal" data-bs-target="#deleteModal{{ item.id }}">
+                                            <i class="fas fa-trash-alt me-1"></i> Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Delete Item Modal -->
+                            <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Delete Item</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete "{{ item.title }}"? This action cannot be undone.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('item_bp.delete_item', item_id=item.id) }}" method="POST">
+                                                <button type="submit" class="btn btn-danger btn-hover-effect">
+                                                    <i class="fas fa-trash-alt me-2"></i>Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <h4>No sold items</h4>
+                        <p>You haven't sold any items yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                <!-- Purchased Items Tab -->
+                <div class="tab-pane fade" id="purchased" role="tabpanel" aria-labelledby="purchased-tab">
+                    {% if purchases %}
+                    <div class="row">
+                        {% for order in purchases %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card item-card shadow-lg hover-shadow h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ order['item_title'] }}</h5>
+                                    <p class="card-text price">₹{{ '%.2f'|format(order['total']|float) }}</p>
+                                    <p class="card-text small text-muted">Seller: {{ order['seller_name'] }} &lt;{{ order['seller_email'] }}&gt;</p>
+                                    <p class="card-text text-muted small">Purchased on {{ order['created_at_str'] }}</p>
+                                </div>
+                                <div class="card-footer bg-white">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="{{ url_for('orders_bp.view_order', order_id=order['id']) }}" class="btn btn-outline-primary btn-hover-effect">
+                                            <i class="fas fa-file-invoice me-1"></i> View Bill
+                                        </a>
+                                        <a href="{{ url_for('orders_bp.download_order', order_id=order['id']) }}" class="btn btn-outline-success btn-hover-effect">
+                                            <i class="fas fa-download me-1"></i> Download
+                                        </a>
+                                        <a href="{{ url_for('item_bp.item_detail', item_id=order['item_id']) }}" class="btn btn-outline-secondary btn-hover-effect">
+                                            <i class="fas fa-eye me-1"></i> View Item
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center p-5">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <h4>No purchases yet</h4>
+                        <p>You have not bought any items yet. Browse the marketplace to find something you like!</p>
+                        <a href="{{ url_for('item_bp.marketplace') }}" class="btn btn-primary btn-lg mt-3 btn-hover-effect">
+                            <i class="fas fa-shopping-cart me-2"></i>Browse Marketplace
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

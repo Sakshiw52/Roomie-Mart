@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics & Reporting - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container-fluid page-transition mt-4 mb-5">
+    <h1 class="mb-4"><i class="fas fa-chart-line me-2"></i>Analytics & Reporting</h1>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Total Items</h5>
+                    <h2 class="text-primary" id="stat-total-items">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Available</h5>
+                    <h2 class="text-success" id="stat-available">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Sold</h5>
+                    <h2 class="text-danger" id="stat-sold">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Total Orders</h5>
+                    <h2 class="text-info" id="stat-orders">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Total Users</h5>
+                    <h2 class="text-warning" id="stat-users">-</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 mb-3">
+            <div class="card text-center shadow-sm hover-shadow">
+                <div class="card-body">
+                    <h5 class="card-title text-muted">Total Revenue</h5>
+                    <h2 class="text-purple" id="stat-revenue">₹-</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row">
+        <!-- Chart 1: Category Distribution -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-th me-2"></i>1. Product Category Distribution</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 2: Sold vs Available -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-pie-chart me-2"></i>2. Total Items Sold vs. Available</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="soldVsAvailableChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 3: Monthly Orders -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-line-chart me-2"></i>3. Monthly Orders / Sales</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyOrdersChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 4: Top 5 Categories -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>4. Top 5 Most Sold Categories</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="topCategoriesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 5: User Growth -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>5. User Growth Chart (Monthly Registrations)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="userGrowthChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart 6: Revenue Analysis -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-rupee-sign me-2"></i>6. Revenue Analysis (Monthly Earnings)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Color palette
+    const colors = {
+        primary: '#36A2EB',
+        success: '#4BC0C0',
+        danger: '#FF6384',
+        warning: '#FFCE56',
+        purple: '#9966FF',
+        orange: '#FF9F40'
+    };
+
+    // Load summary statistics
+    fetch('{{ url_for("reports_bp.api_summary") }}')
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('stat-total-items').textContent = data.total_items;
+            document.getElementById('stat-available').textContent = data.available_items;
+            document.getElementById('stat-sold').textContent = data.sold_items;
+            document.getElementById('stat-orders').textContent = data.total_orders;
+            document.getElementById('stat-users').textContent = data.total_users;
+            document.getElementById('stat-revenue').textContent = '₹' + data.total_revenue.toFixed(2);
+        });
+
+    // Chart 1: Category Distribution (Pie Chart)
+    fetch('{{ url_for("reports_bp.api_category_distribution") }}')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.backgroundColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+
+    // Chart 2: Sold vs Available (Doughnut Chart)
+    fetch('{{ url_for("reports_bp.api_sold_vs_available") }}')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('soldVsAvailableChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.data,
+                        backgroundColor: data.backgroundColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+
+    // Chart 3: Monthly Orders (Line Chart)
+    fetch('{{ url_for("reports_bp.api_monthly_orders") }}')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('monthlyOrdersChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Orders',
+                        data: data.data,
+                        borderColor: data.borderColor,
+                        backgroundColor: data.backgroundColor,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+
+    // Chart 4: Top 5 Categories (Horizontal Bar Chart)
+    fetch('{{ url_for("reports_bp.api_top_categories") }}')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('topCategoriesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Sales Count',
+                        data: data.data,
+                        backgroundColor: colors.success
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+
+    // Chart 5: User Growth (Area Chart)
+    fetch('{{ url_for("reports_bp.api_user_growth") }}')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('userGrowthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'New Users',
+                        data: data.data,
+                        borderColor: data.borderColor,
+                        backgroundColor: data.backgroundColor,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+
+    // Chart 6: Revenue Analysis (Column Chart)
+    fetch('{{ url_for("reports_bp.api_revenue") }}')
+        .then(r => r.json())
+        .then(data => {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Monthly Revenue (₹)',
+                        data: data.data,
+                        backgroundColor: colors.orange
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+</script>
+
+<style>
+    .text-purple {
+        color: #9966FF;
+    }
+</style>
+{% endblock %}

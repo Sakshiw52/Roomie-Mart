@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Pay for Request{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Order Request #{{ request_item.id }}</h2>
+    <div class="card mt-3">
+        <div class="card-body">
+            <p><strong>Item:</strong> {{ request_item.item_id }} - {{ request_item.item_title }}</p>
+            <p><strong>Seller ID:</strong> {{ request_item.owner_id }}</p>
+            <p><strong>Amount:</strong> ₹{{ '%.2f'|format(amount) }}</p>
+            <form method="POST">
+                <p>This page lets you send the order request to the seller. Click <strong>Order Now</strong> to notify the seller. (This project currently uses a simulated flow; payment is not processed.)</p>
+                <button class="btn btn-success">Order Now</button>
+                <a href="{{ url_for('item_bp.item_detail', item_id=request_item.item_id) }}" class="btn btn-secondary ms-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

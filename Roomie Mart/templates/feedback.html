@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Feedback - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Send us Feedback</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('feedback_bp.feedback') }}">
+                        {% if not session.get('user_id') %}
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ name or '' }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" value="{{ email or '' }}" required>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="">Select rating</option>
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Very Good</option>
+                                <option value="3">3 - Good</option>
+                                <option value="2">2 - Fair</option>
+                                <option value="1">1 - Poor</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comment</label>
+                            <textarea name="comment" class="form-control" rows="5" required>{{ comment or '' }}</textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" type="submit">Send Feedback</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

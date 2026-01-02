@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Sales History{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Sales History</h2>
+    {% if orders %}
+    <div class="list-group mt-3">
+        {% for o in orders %}
+        <a href="{{ url_for('orders_bp.view_order', order_id=o.id) }}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ o.item_title }}</h5>
+                <small>{{ o.created_at }}</small>
+            </div>
+            <p class="mb-1">Buyer: {{ o.buyer_name }} &middot; ₹{{ '%.2f'|format(o.total) }}</p>
+            <small>Ref: {{ o.transaction_ref }}</small>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-3">You have not sold any items yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

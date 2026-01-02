@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Marketplace - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container-fluid page-transition">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('item_bp.marketplace') }}" method="GET">
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="">All Categories</option>
+                                <option value="Electronics" {% if category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                                <option value="Books" {% if category == 'Books' %}selected{% endif %}>Books</option>
+                                <option value="Furniture" {% if category == 'Furniture' %}selected{% endif %}>Furniture</option>
+                                <option value="Clothing" {% if category == 'Clothing' %}selected{% endif %}>Clothing</option>
+                                <option value="Kitchen" {% if category == 'Kitchen' %}selected{% endif %}>Kitchen</option>
+                                <option value="Sports" {% if category == 'Sports' %}selected{% endif %}>Sports</option>
+                                <option value="Other" {% if category == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Condition</label>
+                            <select name="condition" class="form-select">
+                                <option value="">Any Condition</option>
+                                <option value="New" {% if condition == 'New' %}selected{% endif %}>New</option>
+                                <option value="Like New" {% if condition == 'Like New' %}selected{% endif %}>Like New</option>
+                                <option value="Good" {% if condition == 'Good' %}selected{% endif %}>Good</option>
+                                <option value="Fair" {% if condition == 'Fair' %}selected{% endif %}>Fair</option>
+                                <option value="Poor" {% if condition == 'Poor' %}selected{% endif %}>Poor</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Hostel/PG</label>
+                            <input type="text" name="hostel" class="form-control" placeholder="Enter hostel name" value="{{ hostel or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Block</label>
+                            <input type="text" name="block" class="form-control" placeholder="Enter block" value="{{ block or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Price Range</label>
+                            <div class="row">
+                                <div class="col-6">
+                                    <input type="number" name="min_price" class="form-control" placeholder="Min" value="{{ min_price or '' }}">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" name="max_price" class="form-control" placeholder="Max" value="{{ max_price or '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-hover-effect">
+                                <i class="fas fa-search me-2"></i>Apply Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Items Grid -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="section-title"><i class="fas fa-shopping-cart me-2"></i>Marketplace</h2>
+                <div class="d-flex">
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('item_bp.add_item') }}" class="btn btn-success btn-hover-effect">
+                        <i class="fas fa-plus-circle me-2"></i>Add Item
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% if items %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for item in items %}
+                    <div class="col stagger-item">
+                        <div class="card h-100 product-card hover-shadow card-hover-zoom">
+                            <div class="card-img-container">
+                                {% if item.image %}
+                                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="card-img-top" alt="{{ item.title }}">
+                                {% else %}
+                                <img src="{{ url_for('static', filename='img/no-image.jpg') }}" class="card-img-top" alt="No Image">
+                                {% endif %}
+                                <span class="badge bg-{{ 'success' if item.condition == 'New' else 'warning' if item.condition == 'Like New' else 'info' if item.condition == 'Good' else 'secondary' }}">
+                                    {{ item.condition }}
+                                </span>
+                                {% if item.status == 'sold' %}
+                                <div class="sold-overlay">
+                                    <span>SOLD</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.title }}</h5>
+                                <p class="card-text text-truncate">{{ item.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="price">₹{{ item.price }}</span>
+                                    <span class="location"><i class="fas fa-map-marker-alt"></i> {{ item.hostel }} {{ item.block }}</span>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-primary">{{ item.category }}</span>
+                                    <small class="text-muted float-end">{{ item.created_at.strftime('%d %b %Y') }}</small>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('item_bp.item_detail', item_id=item.id) }}" class="btn btn-primary btn-sm btn-hover-effect w-100">
+                                    <i class="fas fa-info-circle me-1"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle me-2"></i> No items found matching your criteria.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set selected filter values based on URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        document.querySelectorAll('form select, form input').forEach(el => {
+            const paramValue = urlParams.get(el.name);
+            if (paramValue) {
+                el.value = paramValue;
+            }
+        });
+    });
+</script>
+{% endblock %}

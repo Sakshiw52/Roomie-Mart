@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Your Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if user %}
+                    <form method="POST" action="{{ url_for('auth_bp.profile') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ user['name'] }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" value="{{ user['email'] }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" name="phone" class="form-control" value="{{ user['phone'] }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hostel</label>
+                            <input type="text" name="hostel" class="form-control" value="{{ user['hostel'] }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Block</label>
+                            <input type="text" name="block" class="form-control" value="{{ user['block'] }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Room</label>
+                            <input type="text" name="room" class="form-control" value="{{ user['room'] }}" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Save Profile</button>
+                        </div>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">No profile found. Please <a href="{{ url_for('auth_bp.register') }}">register</a> or login.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

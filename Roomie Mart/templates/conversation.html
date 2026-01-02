@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Conversation - {{ item.title }} - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row mt-4 mb-5">
+        <div class="col-12 mb-3">
+            <a href="{{ url_for('message_bp.messages') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Messages
+            </a>
+        </div>
+        
+        <!-- Conversation Header -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-lg hover-shadow">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="conversation-img-container me-3">
+                            {% if item.image %}
+                            <img src="{{ url_for('static', filename='uploads/' + item.image) }}" alt="{{ item.title }}" class="conversation-img">
+                            {% else %}
+                            <img src="{{ url_for('static', filename='img/no-image.jpg') }}" alt="No Image" class="conversation-img">
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h4 class="mb-1">{{ item.title }}</h4>
+                            <p class="mb-0 text-muted">Conversation with {{ other_user.name }}</p>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="{{ url_for('item_bp.item_detail', item_id=item.id) }}" class="btn btn-outline-primary btn-hover-effect">
+                                <i class="fas fa-eye me-2"></i>View Item
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        <div class="col-12 mb-4">
+            <div class="card shadow-lg hover-shadow">
+                <div class="card-body message-container">
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="message-bubble {{ 'sent' if message.message_type == 'sent' else 'received' }}">
+                        <div class="message-content">
+                            {{ message.content }}
+                        </div>
+                        <div class="message-time">
+                            {{ message.created_at.split(' ')[1][:5] }} | {{ message.created_at.split(' ')[0] }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center p-4">
+                        <p class="text-muted">No messages yet. Start the conversation!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message Form -->
+        <div class="col-12">
+            <div class="card shadow-lg hover-shadow">
+                <div class="card-body">
+                    <form action="{{ url_for('message_bp.send_message') }}" method="POST" id="messageForm">
+                        <input type="hidden" name="receiver_id" value="{{ other_user.id }}">
+                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                        <div class="input-group">
+                            <textarea class="form-control" name="content" id="content" rows="2" placeholder="Type your message..." required></textarea>
+                            <button type="submit" class="btn btn-primary btn-hover-effect">
+                                <i class="fas fa-paper-plane me-2"></i>Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .conversation-img-container {
+        width: 60px;
+        height: 60px;
+        overflow: hidden;
+        border-radius: 8px;
+    }
+    
+    .conversation-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .message-container {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    
+    .message-bubble {
+        max-width: 70%;
+        margin-bottom: 15px;
+        padding: 10px 15px;
+        border-radius: 18px;
+        position: relative;
+    }
+    
+    .message-bubble.sent {
+        background-color: var(--primary-color);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 5px;
+    }
+    
+    .message-bubble.received {
+        background-color: #f1f1f1;
+        color: #333;
+        margin-right: auto;
+        border-bottom-left-radius: 5px;
+    }
+    
+    .message-time {
+        font-size: 0.7rem;
+        opacity: 0.8;
+        margin-top: 5px;
+        text-align: right;
+    }
+</style>
+
+<script>
+    // Auto-scroll to bottom of message container
+    document.addEventListener('DOMContentLoaded', function() {
+        const messageContainer = document.querySelector('.message-container');
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+    });
+</script>
+{% endblock %}

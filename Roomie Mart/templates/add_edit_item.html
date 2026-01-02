@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if item %}Edit Item{% else %}Add New Item{% endif %} - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg hover-shadow my-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{% if item %}Edit Item{% else %}Add New Item{% endif %}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                <input type="text" class="form-control" id="title" name="title" value="{{ item.title if item else '' }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide a title.</div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-list"></i></span>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="" disabled {% if not item %}selected{% endif %}>Select a category</option>
+                                    <option value="Electronics" {% if item and item.category == 'Electronics' %}selected{% endif %}>Electronics</option>
+                                    <option value="Books" {% if item and item.category == 'Books' %}selected{% endif %}>Books</option>
+                                    <option value="Furniture" {% if item and item.category == 'Furniture' %}selected{% endif %}>Furniture</option>
+                                    <option value="Clothing" {% if item and item.category == 'Clothing' %}selected{% endif %}>Clothing</option>
+                                    <option value="Kitchen" {% if item and item.category == 'Kitchen' %}selected{% endif %}>Kitchen</option>
+                                    <option value="Sports" {% if item and item.category == 'Sports' %}selected{% endif %}>Sports</option>
+                                    <option value="Other" {% if item and item.category == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback">Please select a category.</div>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price (₹)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-rupee-sign"></i></span>
+                                <input type="number" class="form-control" id="price" name="price" min="0" value="{{ item.price if item else '' }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide a valid price.</div>
+                        </div>
+
+                        <!-- Condition -->
+                        <div class="mb-3">
+                            <label for="condition" class="form-label">Condition</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-star"></i></span>
+                                <select class="form-select" id="condition" name="condition" required>
+                                    <option value="" disabled {% if not item %}selected{% endif %}>Select condition</option>
+                                    <option value="New" {% if item and item.condition == 'New' %}selected{% endif %}>New</option>
+                                    <option value="Like New" {% if item and item.condition == 'Like New' %}selected{% endif %}>Like New</option>
+                                    <option value="Good" {% if item and item.condition == 'Good' %}selected{% endif %}>Good</option>
+                                    <option value="Fair" {% if item and item.condition == 'Fair' %}selected{% endif %}>Fair</option>
+                                    <option value="Poor" {% if item and item.condition == 'Poor' %}selected{% endif %}>Poor</option>
+                                </select>
+                            </div>
+                            <div class="invalid-feedback">Please select a condition.</div>
+                        </div>
+
+                        <!-- Image Upload -->
+                        <div class="mb-3">
+                            <label for="image" class="form-label">Image</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-image"></i></span>
+                                <input type="file" class="form-control" id="image" name="image" accept="image/*" {% if not item %}required{% endif %}>
+                            </div>
+                            {% if item and item.image %}
+                            <div class="mt-2">
+                                <p>Current image: {{ item.image }}</p>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="keep_image" name="keep_image" value="1" checked>
+                                    <label class="form-check-label" for="keep_image">Keep current image</label>
+                                </div>
+                            </div>
+                            {% endif %}
+                            <div class="invalid-feedback">Please upload an image.</div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+                                <textarea class="form-control" id="description" name="description" rows="4" required>{{ item.description if item else '' }}</textarea>
+                            </div>
+                            <div class="invalid-feedback">Please provide a description.</div>
+                        </div>
+
+                        <!-- Address / Location (optional) -->
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address / Location (optional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-location-dot"></i></span>
+                                <input type="text" class="form-control" id="address" name="address" value="{{ item.address if item else '' }}" placeholder="Hostel/PG name, room or full address">
+                            </div>
+                            <small class="text-muted">You can optionally provide an address or exact coordinates to show a map on the item page.</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="latitude" class="form-label">Latitude (optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                    <input type="text" class="form-control" id="latitude" name="latitude" value="{{ item.latitude if item else '' }}" placeholder="e.g. 12.9716">
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="longitude" class="form-label">Longitude (optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                                    <input type="text" class="form-control" id="longitude" name="longitude" value="{{ item.longitude if item else '' }}" placeholder="e.g. 77.5946">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hostel/PG Name -->
+                        <div class="mb-3">
+                            <label for="hostel" class="form-label">Hostel/PG Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                <input type="text" class="form-control" id="hostel" name="hostel" value="{{ item.hostel if item else current_user.hostel }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide your hostel/PG name.</div>
+                        </div>
+
+                        <!-- Block -->
+                        <div class="mb-3">
+                            <label for="block" class="form-label">Block</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input type="text" class="form-control" id="block" name="block" value="{{ item.block if item else current_user.block }}" required>
+                            </div>
+                            <div class="invalid-feedback">Please provide your block.</div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg btn-hover-effect glow-border">
+                                <i class="fas fa-{% if item %}save{% else %}plus-circle{% endif %} me-2"></i>
+                                {% if item %}Update Item{% else %}Add Item{% endif %}
+                            </button>
+                            <a href="{{ url_for('item_bp.my_items') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+{% endblock %}

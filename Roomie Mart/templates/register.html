@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card auth-card shadow-lg hover-shadow my-5">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>Create Account</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('auth_bp.register') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label">Full Name <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Password <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confirm_password" class="form-label">Confirm Password <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="form-control" id="phone" name="phone">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="hostel" class="form-label">Hostel/PG Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-building"></i></span>
+                                    <input type="text" class="form-control" id="hostel" name="hostel">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="block" class="form-label">Block</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                    <input type="text" class="form-control" id="block" name="block">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="room" class="form-label">Room Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-door-open"></i></span>
+                                    <input type="text" class="form-control" id="room" name="room">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg btn-hover-effect glow-border">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">Already have an account? <a href="{{ url_for('auth_bp.login') }}" class="text-primary">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.title }} - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row mt-4 mb-5">
+        <!-- Breadcrumb -->
+        <div class="col-12 mb-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('item_bp.marketplace') }}">Marketplace</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ item.title }}</li>
+                </ol>
+            </nav>
+        </div>
+        
+        <!-- Product Image -->
+        <div class="col-md-6 mb-4">
+            <div class="product-image-container shadow-lg hover-shadow">
+                {% if item.image %}
+                <img src="{{ url_for('static', filename='uploads/' + item.image) }}" class="img-fluid rounded" alt="{{ item.title }}">
+                {% else %}
+                {# Fallback: show project logo placed in static/images/roomie_logo.png #}
+                <img src="{{ url_for('static', filename='images/roomie_logo.png') }}" class="img-fluid rounded mx-auto d-block p-4" alt="Roomie Mart Logo">
+                {% endif %}
+                
+                {% if item.status == 'sold' %}
+                <div class="sold-overlay-large">
+                    <span>SOLD</span>
+                </div>
+                {% endif %}
+                
+                <span class="badge bg-{{ 'success' if item.condition == 'New' else 'warning' if item.condition == 'Like New' else 'info' if item.condition == 'Good' else 'secondary' }} condition-badge-large">
+                    {{ item.condition }}
+                </span>
+            </div>
+        </div>
+        
+        <!-- Product Details -->
+        <div class="col-md-6">
+            <div class="card shadow-lg hover-shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">{{ item.title }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h4 class="price-large">₹{{ item.price }}</h4>
+                        <span class="badge bg-primary">{{ item.category }}</span>
+                        <span class="text-muted float-end">Posted on {{ item.created_at.strftime('%d %b %Y') }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h5><i class="fas fa-info-circle me-2"></i>Description</h5>
+                        <p>{{ item.description }}</p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h5><i class="fas fa-map-marker-alt me-2"></i>Location</h5>
+                        {# Show address if provided, otherwise fall back to hostel and block #}
+                        {% if item.address %}
+                        <p>{{ item.address }}</p>
+                        {% else %}
+                        <p>{{ item.hostel }} - Block {{ item.block }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <h5><i class="fas fa-user me-2"></i>Seller Information</h5>
+                        <p>{{ seller.name }}</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        {% if current_user.is_authenticated and current_user.id != item.user_id and item.status != 'sold' %}
+                        <div class="d-flex gap-2">
+                            <form action="{{ url_for('requests_bp.create_request', item_id=item.id) }}" method="POST">
+                                <input type="hidden" name="from_buy" value="1">
+                                <button type="submit" class="btn btn-success btn-lg btn-hover-effect">
+                                    <i class="fas fa-shopping-bag me-2"></i>Order Now
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-primary btn-lg btn-hover-effect glow-border" data-bs-toggle="modal" data-bs-target="#contactModal">
+                                <i class="fas fa-envelope me-2"></i>Contact Seller
+                            </button>
+                        </div>
+                        {% elif current_user.is_authenticated and current_user.id == item.user_id %}
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="{{ url_for('item_bp.edit_item', item_id=item.id) }}" class="btn btn-warning btn-lg btn-hover-effect w-100">
+                                    <i class="fas fa-edit me-2"></i>Edit
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                {% if item.status != 'sold' %}
+                                <button type="button" class="btn btn-success btn-lg btn-hover-effect w-100" data-bs-toggle="modal" data-bs-target="#markSoldModal">
+                                    <i class="fas fa-check-circle me-2"></i>Mark as Sold
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-secondary btn-lg w-100" disabled>
+                                    <i class="fas fa-check-circle me-2"></i>Sold
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-lg btn-hover-effect" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash-alt me-2"></i>Delete
+                        </button>
+                        {% elif not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth_bp.login') }}" class="btn btn-primary btn-lg btn-hover-effect glow-border">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Contact Seller
+                        </a>
+                        {% else %}
+                        <button type="button" class="btn btn-secondary btn-lg" disabled>
+                            <i class="fas fa-ban me-2"></i>Item Sold
+                        </button>
+                        {% endif %}
+                        
+                        {# If there is an order for this item involving current user, show Purchase Details & View Bill #}
+                        {% if order %}
+                        <div class="mt-3">
+                            <a href="{{ url_for('orders_bp.view_order', order_id=order['id']) }}" class="btn btn-outline-primary me-2">View Bill</a>
+                            <!-- Purchase Details modal trigger -->
+                            <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#purchaseDetailsModal">Purchase Details</button>
+                            {# If the current user is the buyer, allow leaving feedback for this order #}
+                            {% if current_user.is_authenticated and order['buyer_id'] == current_user.id %}
+                            <a href="{{ url_for('feedback_bp.feedback_for_order', order_id=order['id']) }}" class="btn btn-success ms-2">Leave Feedback</a>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Map removed — display address text only as per requirements #}
+
+<!-- Contact Seller Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="contactModalLabel">Contact Seller</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('item_bp.send_request', item_id=item.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Your Message</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-hover-effect">
+                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Request to Buy Modal -->
+<div class="modal fade" id="requestModal" tabindex="-1" aria-labelledby="requestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="requestModalLabel">Request to Buy</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('requests_bp.create_request', item_id=item.id) }}" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="reqMessage" class="form-label">Message for seller (optional)</label>
+                        <textarea class="form-control" id="reqMessage" name="message" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-hover-effect">
+                        <i class="fas fa-paper-plane me-2"></i>Send Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Mark as Sold Modal -->
+<div class="modal fade" id="markSoldModal" tabindex="-1" aria-labelledby="markSoldModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="markSoldModalLabel">Mark Item as Sold</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to mark this item as sold? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('item_bp.mark_as_sold', item_id=item.id) }}" method="POST">
+                    <button type="submit" class="btn btn-success btn-hover-effect">
+                        <i class="fas fa-check-circle me-2"></i>Mark as Sold
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Item Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('item_bp.delete_item', item_id=item.id) }}" method="POST">
+                    <button type="submit" class="btn btn-danger btn-hover-effect">
+                        <i class="fas fa-trash-alt me-2"></i>Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<!-- Purchase Details Modal -->
+<div class="modal fade" id="purchaseDetailsModal" tabindex="-1" aria-labelledby="purchaseDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="purchaseDetailsModalLabel">Purchase Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                {% if order %}
+                <dl class="row">
+                    <dt class="col-sm-3">Order ID</dt><dd class="col-sm-9">{{ order['id'] }}</dd>
+                    <dt class="col-sm-3">Item</dt><dd class="col-sm-9">{{ order['item_title'] }}</dd>
+                    <dt class="col-sm-3">Buyer</dt><dd class="col-sm-9">{{ order['buyer_name'] }} &lt;{{ order['buyer_email'] }}&gt;</dd>
+                    <dt class="col-sm-3">Seller</dt><dd class="col-sm-9">{{ order['seller_name'] }} &lt;{{ order['seller_email'] }}&gt;</dd>
+                    <dt class="col-sm-3">Price</dt><dd class="col-sm-9">₹{{ '%.2f'|format(order['price']) }}</dd>
+                    <dt class="col-sm-3">Quantity</dt><dd class="col-sm-9">{{ order['quantity'] }}</dd>
+                    <dt class="col-sm-3">Total</dt><dd class="col-sm-9">₹{{ '%.2f'|format(order['total']) }}</dd>
+                    <dt class="col-sm-3">Transaction Ref</dt><dd class="col-sm-9"><code>{{ order['transaction_ref'] }}</code></dd>
+                    <dt class="col-sm-3">Status</dt><dd class="col-sm-9">{{ order['status'] }}</dd>
+                    <dt class="col-sm-3">Created</dt><dd class="col-sm-9">{{ order['created_at'] }}</dd>
+                </dl>
+                {% else %}
+                <p>No purchase information available.</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if order %}
+                <a href="{{ url_for('orders_bp.download_order', order_id=order['id']) }}" class="btn btn-primary">Download Bill</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{# Extra JS injected into base.html's extra_js block - map initialization when coords exist #}
+{% block extra_js %}
+<!-- Maps removed: no external Google Maps script is loaded. -->
+{% endblock %}

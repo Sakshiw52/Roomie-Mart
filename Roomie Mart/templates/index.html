@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Roomie Mart - Hostel/PG Item Trading Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid page-transition">
+    <!-- Hero Section -->
+    <div class="row hero-section mb-5">
+    <!-- Background image (uses file present in static/images) -->
+    <div class="hero-bg" data-bg="{{ url_for('static', filename='images/home page design.png') }}"></div>
+        <div class="col-md-12 text-center py-5 hero-content">
+            <h1 class="display-4 gradient-text">Welcome to Roomie Mart</h1>
+            <!-- Primary action buttons -->
+            <div class="d-flex justify-content-center mt-3">
+                <a href="{{ url_for('item_bp.marketplace') }}" class="btn btn-primary btn-lg btn-hover-effect glow-border me-2">
+                    <i class="fas fa-shopping-cart me-2"></i>Browse Marketplace
+                </a>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('item_bp.add_item') }}" class="btn btn-success btn-lg btn-hover-effect ms-2">
+                    <i class="fas fa-plus-circle me-2"></i>Add Item
+                </a>
+                {% else %}
+                <a href="{{ url_for('auth_bp.login') }}" class="btn btn-outline-primary btn-lg btn-hover-effect ms-2">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Sell
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Quick nav buttons (duplicate of header links for convenience) -->
+            {% if current_user.is_authenticated %}
+            <div class="quick-nav d-flex justify-content-center gap-2 mt-4">
+                <a href="{{ url_for('item_bp.my_items') }}" class="btn btn-outline-secondary btn-sm px-3">
+                    <i class="fas fa-boxes me-1"></i>My Items
+                </a>
+                <a href="{{ url_for('feedback_bp.feedback') }}" class="btn btn-outline-secondary btn-sm px-3">
+                    <i class="fas fa-comment-dots me-1"></i>Feedback
+                </a>
+                <a href="{{ url_for('reports_bp.analytics_dashboard') }}" class="btn btn-outline-secondary btn-sm px-3">
+                    <i class="fas fa-chart-line me-1"></i>Analytics
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Featured Items removed per request -->
+
+    <!-- Categories Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title text-center mb-4">Browse Categories</h2>
+        </div>
+        <div class="col-md-3 col-6 mb-4 stagger-item">
+            <a href="{{ url_for('item_bp.search') }}?category=Electronics" class="category-card">
+                <div class="card text-center hover-shadow">
+                    <div class="card-body">
+                        <i class="fas fa-laptop fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Electronics</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-6 mb-4 stagger-item">
+            <a href="{{ url_for('item_bp.search') }}?category=Books" class="category-card">
+                <div class="card text-center hover-shadow">
+                    <div class="card-body">
+                        <i class="fas fa-book fa-3x mb-3 text-success"></i>
+                        <h5 class="card-title">Books</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-6 mb-4 stagger-item">
+            <a href="{{ url_for('item_bp.search') }}?category=Furniture" class="category-card">
+                <div class="card text-center hover-shadow">
+                    <div class="card-body">
+                        <i class="fas fa-couch fa-3x mb-3 text-warning"></i>
+                        <h5 class="card-title">Furniture</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-6 mb-4 stagger-item">
+            <a href="{{ url_for('item_bp.search') }}?category=Clothing" class="category-card">
+                <div class="card text-center hover-shadow">
+                    <div class="card-body">
+                        <i class="fas fa-tshirt fa-3x mb-3 text-danger"></i>
+                        <h5 class="card-title">Clothing</h5>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    {% if not current_user.is_authenticated %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="section-title text-center mb-4">How It Works</h2>
+        </div>
+        <div class="col-md-4 mb-4 stagger-item">
+            <div class="card text-center hover-shadow h-100">
+                <div class="card-body">
+                    <div class="step-icon mb-3">
+                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    </div>
+                    <h4>1. Create Account</h4>
+                    <p>Sign up with your hostel/PG details to join our community</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 stagger-item">
+            <div class="card text-center hover-shadow h-100">
+                <div class="card-body">
+                    <div class="step-icon mb-3">
+                        <i class="fas fa-camera fa-3x text-primary"></i>
+                    </div>
+                    <h4>2. List Your Items</h4>
+                    <p>Take photos and create listings for items you want to sell</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4 stagger-item">
+            <div class="card text-center hover-shadow h-100">
+                <div class="card-body">
+                    <div class="step-icon mb-3">
+                        <i class="fas fa-handshake fa-3x text-primary"></i>
+                    </div>
+                    <h4>3. Connect & Trade</h4>
+                    <p>Chat with buyers/sellers and meet to complete the transaction</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.hero-bg').forEach(function(el){
+        var url = el.getAttribute('data-bg');
+        if(url){
+            // set background-image via JS to avoid template quoting issues
+            el.style.backgroundImage = "url('" + url + "')";
+        }
+    });
+});
+</script>
+{% endblock %}

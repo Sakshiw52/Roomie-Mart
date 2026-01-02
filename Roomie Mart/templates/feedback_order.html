@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Feedback - Roomie Mart{% endblock %}
+
+{% block content %}
+<div class="container page-transition">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Submit Feedback for Purchase</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('feedback_bp.feedback_for_order', order_id=request.view_args.get('order_id')) }}">
+                        <div class="mb-3">
+                            <label class="form-label">Item</label>
+                            <input type="text" class="form-control" value="{{ item_title }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Seller</label>
+                            <input type="text" class="form-control" value="{{ seller_name }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <select name="rating" class="form-select" required>
+                                <option value="">Select rating</option>
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Very Good</option>
+                                <option value="3">3 - Good</option>
+                                <option value="2">2 - Fair</option>
+                                <option value="1">1 - Poor</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Comment (optional)</label>
+                            <textarea name="comment" class="form-control" rows="4">{{ comment or '' }}</textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button class="btn btn-primary btn-lg" type="submit">Submit Feedback</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

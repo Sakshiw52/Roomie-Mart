@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}My Requests{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>My Requests</h2>
+    {% if requests %}
+    <div class="list-group mt-3">
+        {% for r in requests %}
+        <a href="{{ url_for('item_bp.item_detail', item_id=r.item_id) }}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ r.item_title }}</h5>
+                <small>{{ r.created_at }}</small>
+            </div>
+            <p class="mb-1">Status: <strong>{{ r.status }}</strong></p>
+            <small>Ref: Request #{{ r.id }}</small>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mt-3">You have not made any requests yet.</div>
+    {% endif %}
+</div>
+{% endblock %}
